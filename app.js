@@ -528,7 +528,15 @@
     panelSettings: document.getElementById('panelSettings'),
     panelBackup: document.getElementById('panelBackup'),
     editScheduleSelect: document.getElementById('editScheduleSelect'),
+    btnOpenCopySteps: document.getElementById('btnOpenCopySteps'),
     btnAddStep: document.getElementById('btnAddStep'),
+    copyStepsModal: document.getElementById('copyStepsModal'),
+    copyStepsDesc: document.getElementById('copyStepsDesc'),
+    copySourceSelect: document.getElementById('copySourceSelect'),
+    copyModeSelect: document.getElementById('copyModeSelect'),
+    copyReverseCheck: document.getElementById('copyReverseCheck'),
+    btnCancelCopySteps: document.getElementById('btnCancelCopySteps'),
+    btnDoCopySteps: document.getElementById('btnDoCopySteps'),
     metaScheduleTitle: document.getElementById('metaScheduleTitle'),
     metaScheduleIcon: document.getElementById('metaScheduleIcon'),
     metaScheduleTheme: document.getElementById('metaScheduleTheme'),
@@ -2175,6 +2183,59 @@
 
     dom.btnAddStep.addEventListener('click', () => {
       openStepEditModal(editingScheduleId, null);
+    });
+
+    // 別の手順表からコピー
+    dom.btnOpenCopySteps.addEventListener('click', () => {
+      const targetSch = getScheduleById(editingScheduleId);
+      const sources = state.schedules.filter((s) => s.id !== editingScheduleId);
+      if (sources.length === 0) {
+        showToast('コピー元の手順表がありません');
+        return;
+      }
+      dom.copyStepsDesc.textContent = `「${targetSch.title}」へ手順（写真・シンボル含む）をコピーします。`;
+      dom.copySourceSelect.innerHTML = '';
+      sources.forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.icon || ''} ${s.title}（${s.steps.length} こ）`.trim();
+        dom.copySourceSelect.appendChild(opt);
+      });
+      dom.copyModeSelect.value = 'replace';
+      dom.copyReverseCheck.checked = false;
+      dom.copyStepsModal.classList.remove('hidden');
+    });
+
+    dom.btnCancelCopySteps.addEventListener('click', () => {
+      dom.copyStepsModal.classList.add('hidden');
+    });
+
+    dom.btnDoCopySteps.addEventListener('click', () => {
+      const targetSch = getScheduleById(editingScheduleId);
+      const sourceSch = state.schedules.find((s) => s.id === dom.copySourceSelect.value);
+      if (!targetSch || !sourceSch) {
+        dom.copyStepsModal.classList.add('hidden');
+        return;
+      }
+      let copied = sourceSch.steps.map((st) => ({
+        ...st,
+        id: createUid('st'),
+        done: false
+      }));
+      if (dom.copyReverseCheck.checked) {
+        copied = copied.reverse();
+      }
+      if (dom.copyModeSelect.value === 'replace') {
+        targetSch.steps = copied;
+      } else {
+        targetSch.steps.push(...copied);
+      }
+      clearSpokenForSchedule(targetSch);
+      saveStateToStorage(state);
+      renderEditStepList(targetSch);
+      renderScheduleManageList();
+      dom.copyStepsModal.classList.add('hidden');
+      showToast(`「${sourceSch.title}」の手順（${copied.length} こ）をコピーしました！`);
     });
 
     dom.btnAddSchedule.addEventListener('click', () => {

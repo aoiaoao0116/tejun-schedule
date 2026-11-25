@@ -11,7 +11,7 @@
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=12">
+  <link rel="stylesheet" href="./styles.css?v=13">
 </head>
 <body class="theme-morning font-normal">
   <div id="app" class="app-shell">
@@ -169,7 +169,10 @@
               編集する手順表：
               <select id="editScheduleSelect" class="form-select"></select>
             </label>
-            <button type="button" class="btn btn-primary" id="btnAddStep">＋ 手順を追加</button>
+            <div class="edit-row-btns">
+              <button type="button" class="btn btn-secondary" id="btnOpenCopySteps">📋 別の手順表からコピー</button>
+              <button type="button" class="btn btn-primary" id="btnAddStep">＋ 手順を追加</button>
+            </div>
           </div>
 
           <div class="schedule-meta-box">
@@ -443,6 +446,35 @@
     </div>
   </div>
 
-  <script src="./app.js?v=12"></script>
+  <!-- 別の手順表からコピー モーダル -->
+  <div class="modal-backdrop hidden" id="copyStepsModal" role="dialog" aria-modal="true" aria-labelledby="copyStepsTitle">
+    <div class="modal-card modal-small">
+      <h2 class="modal-title" id="copyStepsTitle">📋 別の手順表からコピー</h2>
+      <p class="modal-desc" id="copyStepsDesc">別の手順表の手順（写真・シンボル含む）をコピーします。</p>
+      <div class="copy-steps-form">
+        <div class="form-field">
+          <label for="copySourceSelect">コピー元の手順表</label>
+          <select id="copySourceSelect" class="form-select"></select>
+        </div>
+        <div class="form-field">
+          <label for="copyModeSelect">コピーのしかた</label>
+          <select id="copyModeSelect" class="form-select">
+            <option value="replace">いまの手順をすべて入れ替える（上書き）</option>
+            <option value="append">いまの手順のうしろに追加する</option>
+          </select>
+        </div>
+        <label class="copy-reverse-check">
+          <input type="checkbox" id="copyReverseCheck">
+          <span>順番を逆にしてコピーする（朝→帰りなどに便利）</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="btnCancelCopySteps">やめる</button>
+        <button type="button" class="btn btn-primary" id="btnDoCopySteps">コピーする</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js?v=13"></script>
 </body>
 </html>

@@ -893,6 +893,33 @@ body.compact-done .step-card.is-done .step-hint {
   z-index: 60;
 }
 
+#copyStepsModal {
+  z-index: 62;
+}
+
+.copy-steps-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.copy-reverse-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.copy-reverse-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
 #pinModal {
   z-index: 65;
 }
