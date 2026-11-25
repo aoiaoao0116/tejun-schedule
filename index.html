@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="てじゅんひょう">
+  <meta name="theme-color" content="#f5f7fa">
+  <title>てじゅんひょう｜あさ・かえりの じゅんび</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css?v=12">
+</head>
+<body class="theme-morning font-normal">
+  <div id="app" class="app-shell">
+    <!-- 上部ナビゲーション（児童画面はシンプルにタイトル＋先生ボタンのみ） -->
+    <header class="app-header">
+      <div class="header-current-title" id="currentScheduleTitle">☀️ あさの じゅんび</div>
+      <div class="header-actions">
+        <span class="progress-count" id="progressCount">0 / 15 できた</span>
+        <button type="button" class="icon-action-btn teacher-hold-btn" id="btnTeacherMode" title="1.5びょう ながおしで せんせいモード" aria-label="せんせいモード（ながおし）">
+          <svg class="hold-ring" viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="hold-ring-bg" cx="22" cy="22" r="19"></circle>
+            <circle class="hold-ring-progress" id="holdRingProgress" cx="22" cy="22" r="19"></circle>
+          </svg>
+          <span class="hold-icon" aria-hidden="true">⚙️</span>
+          <span class="action-sub">せんせい</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 進捗バー -->
+    <section class="progress-bar-wrap" aria-label="すすみぐあい">
+      <div class="progress-rail-wrap">
+        <div class="progress-track" role="progressbar" id="progressTrack" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="train-runner hidden" id="trainRunner" aria-hidden="true">
+          <svg viewBox="0 0 64 28" width="54" height="24" xmlns="http://www.w3.org/2000/svg">
+            <!-- JR九州ふう 赤い電車（右向き進行） -->
+            <rect x="2" y="4" width="54" height="18" rx="4" fill="#d90429" stroke="#1f2328" stroke-width="1.8"/>
+            <path d="M48 4 H56 Q61 4 61 11 V18 Q61 22 56 22 H48 Z" fill="#1f2328"/>
+            <rect x="6" y="8" width="10" height="6" rx="1.5" fill="#e0f2fe"/>
+            <rect x="19" y="8" width="10" height="6" rx="1.5" fill="#e0f2fe"/>
+            <rect x="32" y="8" width="10" height="6" rx="1.5" fill="#e0f2fe"/>
+            <path d="M50 7 H56 Q58.5 7 58.5 11 V14 H50 Z" fill="#e0f2fe"/>
+            <rect x="3" y="16.5" width="46" height="2" fill="#eab308"/>
+            <circle cx="58" cy="18.5" r="1.8" fill="#fef08a"/>
+            <circle cx="14" cy="23.5" r="3" fill="#1f2328"/>
+            <circle cx="24" cy="23.5" r="3" fill="#1f2328"/>
+            <circle cx="42" cy="23.5" r="3" fill="#1f2328"/>
+            <circle cx="52" cy="23.5" r="3" fill="#1f2328"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- メイン表示エリア -->
+    <main class="main-content" id="mainContent">
+      <!-- いちらんモード -->
+      <div class="step-list" id="stepListView"></div>
+
+      <!-- 1まいずつモード -->
+      <div class="single-step-view hidden" id="singleStepView"></div>
+
+      <!-- ぜんぶ できた！画面 -->
+      <div class="complete-view hidden" id="completeView">
+        <div class="complete-card">
+          <div class="complete-badge" id="completeBadge" aria-hidden="true">💮</div>
+          <h1 class="complete-heading" id="completeHeading">ぜんぶ できたね！</h1>
+          <p class="complete-sub" id="completeSubText">とても よく がんばりました</p>
+          <div class="next-activity-box hidden" id="nextActivityBox">
+            <span class="next-activity-label">つぎに すること</span>
+            <div class="next-activity-text" id="nextActivityText"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 長押しヒントのトースト -->
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 先生モード 4けたパスワード入力モーダル -->
+  <div class="modal-backdrop hidden" id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+    <div class="modal-card modal-small pin-modal-card">
+      <h2 class="modal-title text-center" id="pinModalTitle">🔒 せんせい パスワード</h2>
+      <p class="pin-desc">4けたの すうじを いれてください</p>
+      <div class="pin-dots" id="pinDots" aria-hidden="true">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <p class="pin-error" id="pinError" aria-live="polite"></p>
+      <div class="pin-keypad" id="pinKeypad">
+        <button type="button" class="pin-key" data-digit="1">1</button>
+        <button type="button" class="pin-key" data-digit="2">2</button>
+        <button type="button" class="pin-key" data-digit="3">3</button>
+        <button type="button" class="pin-key" data-digit="4">4</button>
+        <button type="button" class="pin-key" data-digit="5">5</button>
+        <button type="button" class="pin-key" data-digit="6">6</button>
+        <button type="button" class="pin-key" data-digit="7">7</button>
+        <button type="button" class="pin-key" data-digit="8">8</button>
+        <button type="button" class="pin-key" data-digit="9">9</button>
+        <button type="button" class="pin-key pin-key-sub" id="btnPinCancel">やめる</button>
+        <button type="button" class="pin-key" data-digit="0">0</button>
+        <button type="button" class="pin-key pin-key-sub" id="btnPinBackspace" aria-label="1もじ けす">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 確認モーダル（リセット等） -->
+  <div class="modal-backdrop hidden" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-card modal-small">
+      <h2 class="modal-title" id="confirmTitle">さいしょから やりなおしますか？</h2>
+      <p class="modal-desc" id="confirmDesc">チェックした「できた」を すべて もどします。</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="btnConfirmCancel">やめる</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmOk">やりなおす</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- せんせいモード（編集・設定モーダル） -->
+  <div class="modal-backdrop hidden" id="teacherModal" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h2 class="modal-title" id="teacherModalTitle">⚙️ せんせいモード（切替・編集・設定）</h2>
+        <button type="button" class="btn btn-primary" id="btnCloseTeacher">✓ おわって もどる</button>
+      </div>
+
+      <!-- 先生用クイック操作バー（手順表切替・表示モード・リセット） -->
+      <div class="teacher-quick-bar">
+        <div class="quick-group">
+          <span class="quick-label">表示する手順表：</span>
+          <div class="schedule-tabs" id="scheduleTabs" role="tablist" aria-label="スケジュールを えらぶ"></div>
+        </div>
+        <div class="quick-group quick-group-right">
+          <div class="view-toggle" role="group" aria-label="ひょうじ モード">
+            <button type="button" class="toggle-btn" id="btnModeList" data-mode="list" aria-pressed="true">
+              <span class="btn-icon" aria-hidden="true">📋</span>
+              <span>いちらん</span>
+            </button>
+            <button type="button" class="toggle-btn" id="btnModeSingle" data-mode="single" aria-pressed="false">
+              <span class="btn-icon" aria-hidden="true">🖼️</span>
+              <span>1まいずつ</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnUndoOne" title="さいごの1つだけ未完了にもどす">↩️ 1つもどす</button>
+          <button type="button" class="btn btn-secondary" id="btnReset">↺ さいしょから に戻す</button>
+        </div>
+      </div>
+
+      <div class="teacher-tabs" role="tablist">
+        <button type="button" class="teacher-tab active" data-tab="steps">📝 手順を編集</button>
+        <button type="button" class="teacher-tab" data-tab="schedules">📂 手順表の管理</button>
+        <button type="button" class="teacher-tab" data-tab="settings">🔧 使いやすさ設定</button>
+        <button type="button" class="teacher-tab" data-tab="backup">💾 保存・移行</button>
+      </div>
+
+      <div class="teacher-body">
+        <!-- タブ1: 手順を編集 -->
+        <div class="teacher-panel" id="panelSteps">
+          <div class="panel-toolbar">
+            <label class="inline-select-label">
+              編集する手順表：
+              <select id="editScheduleSelect" class="form-select"></select>
+            </label>
+            <button type="button" class="btn btn-primary" id="btnAddStep">＋ 手順を追加</button>
+          </div>
+
+          <div class="schedule-meta-box">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="metaScheduleTitle">手順表のなまえ</label>
+                <input type="text" id="metaScheduleTitle" class="form-input" placeholder="例：あさの じゅんび">
+              </div>
+              <div class="form-field form-field-sm">
+                <label for="metaScheduleIcon">アイコン</label>
+                <input type="text" id="metaScheduleIcon" class="form-input text-center" maxlength="4" placeholder="☀️">
+              </div>
+              <div class="form-field form-field-sm">
+                <label for="metaScheduleTheme">いろテーマ</label>
+                <select id="metaScheduleTheme" class="form-select">
+                  <option value="morning">あさ（みずいろ・たいよう）</option>
+                  <option value="evening">かえり（オレンジ・ゆうやけ）</option>
+                  <option value="green">みどり（おちつき）</option>
+                  <option value="purple">むらさき（やさしい）</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="metaNextActivity">ぜんぶ終わったあとの「つぎに すること」（任意）</label>
+              <input type="text" id="metaNextActivity" class="form-input" placeholder="例：せきに すわって あさの かいを まつ">
+            </div>
+          </div>
+
+          <p class="drag-hint">💡 それぞれの手順を <strong>長押しして上下にドラッグ</strong>（または左の <strong>☰</strong> をドラッグ）すると順番を入れ替えられます。</p>
+          <div class="edit-step-list" id="editStepList"></div>
+        </div>
+
+        <!-- タブ2: 手順表の管理 -->
+        <div class="teacher-panel hidden" id="panelSchedules">
+          <div class="panel-toolbar">
+            <p class="panel-hint">「あさの じゅんび」「かえりの じゅんび」以外にも、きゅうしょく・そうじ等を追加できます。</p>
+            <button type="button" class="btn btn-primary" id="btnAddSchedule">＋ あたらしい手順表</button>
+          </div>
+          <div class="schedule-manage-list" id="scheduleManageList"></div>
+        </div>
+
+        <!-- タブ3: 使いやすさ設定 -->
+        <div class="teacher-panel hidden" id="panelSettings">
+          <div class="settings-list">
+            <label class="setting-item setting-item-train">
+              <div class="setting-text">
+                <strong>🚃 でんしゃモード（JR九州ふう）</strong>
+                <span>JR九州の赤・黒カラー＆駅ナンバリング（JB1、JB2…）と走る電車に切り替えます</span>
+              </div>
+              <input type="checkbox" id="settingTrainMode" class="toggle-switch">
+            </label>
+
+            <label class="setting-item" id="settingTrainLineRow">
+              <div class="setting-text">
+                <strong>JR九州 路線記号（駅ナンバリング）</strong>
+                <span>手順の番号に表示する路線記号を選びます</span>
+              </div>
+              <select id="settingTrainLine" class="form-select">
+                <option value="JB">JB（鹿児島本線 博多〜荒尾・あか）</option>
+                <option value="JA">JA（鹿児島本線 門司港〜博多・あか）</option>
+                <option value="JC">JC（福北ゆたか線・きいろ）</option>
+                <option value="JD">JD（香椎線・みずいろ）</option>
+                <option value="JF">JF（日豊本線・あお）</option>
+                <option value="JK">JK（筑肥線・みどり）</option>
+              </select>
+            </label>
+
+            <div class="setting-item" id="settingTrainSoundTestRow">
+              <div class="setting-text">
+                <strong>鉄道チャイム・到着メロディの確認</strong>
+                <span>先生用の試聴ボタンです（音量を確認できます）</span>
+              </div>
+              <div class="edit-row-btns">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnTestTrainChime">🔔 1えき音</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnTestTrainArrival">🎵 終点メロディ</button>
+              </div>
+            </div>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>文字の大きさ</strong>
+                <span>見やすい大きさに調整します</span>
+              </div>
+              <select id="settingFontSize" class="form-select">
+                <option value="normal">ふつう</option>
+                <option value="large">おおきい</option>
+              </select>
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>「できた」を上から順番にしか押せないようにする</strong>
+                <span>ONにすると今の1つだけ押せます（飛ばし押し・誤タップ防止）</span>
+              </div>
+              <input type="checkbox" id="settingSequential" class="toggle-switch">
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>「できた」を取り消せないようにする</strong>
+                <span>ONにすると一度押した「できた」を戻せなくなります（戻すときは先生モードから）</span>
+              </div>
+              <input type="checkbox" id="settingLockDone" class="toggle-switch">
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>効果音（できた音・ファンファーレ）</strong>
+                <span>タップしたときにやさしい音が鳴ります</span>
+              </div>
+              <input type="checkbox" id="settingSound" class="toggle-switch">
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>音声よみあげボタンを表示</strong>
+                <span>🔊ボタンで手順を声で読み上げます（iPadの音声機能を使用）</span>
+              </div>
+              <input type="checkbox" id="settingSpeech" class="toggle-switch">
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>よみあげは 1かい だけにする（連打防止）</strong>
+                <span>ONにすると、1つの手順につき1回だけ読み上げできます（「もどす」で再リセット）</span>
+              </div>
+              <input type="checkbox" id="settingSpeechOnceOnly" class="toggle-switch">
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>1まいずつモードで自動よみあげ</strong>
+                <span>次のカードに切り替わったときに自動で読み上げます</span>
+              </div>
+              <input type="checkbox" id="settingAutoSpeech" class="toggle-switch">
+            </label>
+
+            <label class="setting-item">
+              <div class="setting-text">
+                <strong>完了したカードをうすく折りたたむ（いちらんモード）</strong>
+                <span>終わった手順を小さくして、残りの手順を見やすくします</span>
+              </div>
+              <input type="checkbox" id="settingCompactDone" class="toggle-switch">
+            </label>
+
+            <div class="setting-item setting-item-pin">
+              <div class="setting-text">
+                <strong>🔒 せんせいモードのパスワード（4けた）</strong>
+                <span id="pinStatusText">現在：設定なし（長押しだけで開きます）</span>
+              </div>
+              <div class="pin-setting-controls">
+                <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="settingPinInput" class="form-input pin-input" placeholder="例：1234" autocomplete="off">
+                <button type="button" class="btn btn-primary btn-sm" id="btnSavePin">設定する</button>
+                <button type="button" class="btn btn-ghost btn-sm hidden" id="btnClearPin">解除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- タブ4: 保存・移行 -->
+        <div class="teacher-panel hidden" id="panelBackup">
+          <div class="backup-grid">
+            <div class="backup-card">
+              <h3>📤 データを書き出す（バックアップ）</h3>
+              <p>作成した手順表や登録した写真を1つのファイルに保存します。別のiPadへ移すときにも使えます。</p>
+              <button type="button" class="btn btn-primary" id="btnExportData">ファイルを保存する</button>
+            </div>
+            <div class="backup-card">
+              <h3>📥 データを読み込む（復元・コピー）</h3>
+              <p>書き出したバックアップファイル（.json）を読み込みます。※現在のデータは上書きされます。</p>
+              <label class="btn btn-secondary file-btn">
+                ファイルを選ぶ
+                <input type="file" id="inputImportData" accept=".json,application/json" hidden>
+              </label>
+            </div>
+            <div class="backup-card">
+              <h3>🖨️ 紙の手順表として印刷</h3>
+              <p>今選んでいる手順表をA4などの紙にきれいに印刷できます（ラミネート掲示用にも）。</p>
+              <button type="button" class="btn btn-secondary" id="btnPrintSchedule">この手順表を印刷する</button>
+            </div>
+            <div class="backup-card danger-card">
+              <h3>⚠️ 初期状態にもどす</h3>
+              <p>すべての手順表・写真・設定を最初のサンプル状態にリセットします。</p>
+              <button type="button" class="btn btn-danger" id="btnFactoryReset">初期状態にもどす</button>
+            </div>
+          </div>
+          <p class="privacy-note">
+            🔒 <strong>あんしん設計：</strong>登録した写真や手順データは、このiPad本体の中にだけ保存されます。インターネットや外部サーバーには一切送信されません。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ステップ編集モーダル -->
+  <div class="modal-backdrop hidden" id="stepEditModal" role="dialog" aria-modal="true" aria-labelledby="stepEditTitle">
+    <div class="modal-card modal-medium">
+      <div class="modal-header">
+        <h2 class="modal-title" id="stepEditTitle">手順を編集</h2>
+        <button type="button" class="btn btn-ghost" id="btnCancelStepEdit">✕</button>
+      </div>
+
+      <div class="step-edit-body">
+        <div class="form-field">
+          <label for="stepTextInput">やること（ことば）</label>
+          <input type="text" id="stepTextInput" class="form-input form-input-lg" placeholder="例：リュックを おく">
+        </div>
+
+        <div class="form-field">
+          <label for="stepHintInput">ほそく（任意・小さく表示されます）</label>
+          <input type="text" id="stepHintInput" class="form-input" placeholder="例：じぶんの ロッカーに いれる">
+        </div>
+
+        <div class="form-field">
+          <label>しゃしん・イラスト</label>
+          <div class="media-preview-row">
+            <div class="media-preview-box" id="stepMediaPreview">🎒</div>
+            <div class="media-buttons">
+              <label class="btn btn-primary file-btn">
+                📷 しゃしんをとる / えらぶ
+                <input type="file" id="stepPhotoInput" accept="image/*" hidden>
+              </label>
+              <button type="button" class="btn btn-ghost hidden" id="btnRemovePhoto">しゃしんを けす</button>
+              <p class="media-hint">iPadのカメラで実物（本人のリュックやロッカーなど）を撮ると、よりわかりやすくなります。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <div class="picker-tabs" role="tablist">
+            <button type="button" class="picker-tab active" id="tabPickerSymbols" data-picker="symbols">🖼️ DROPS / シンボル集</button>
+            <button type="button" class="picker-tab" id="tabPickerEmojis" data-picker="emojis">😊 絵文字アイコン</button>
+          </div>
+
+          <!-- DROPS / シンボル集パネル -->
+          <div class="symbol-picker-panel" id="symbolPickerPanel">
+            <div class="symbol-toolbar">
+              <input type="search" id="symbolSearchInput" class="form-input symbol-search-input" placeholder="🔍 なまえで さがす（例：リュック、トイレ）">
+              <label class="btn btn-primary btn-sm file-btn">
+                🖼️ まとめて追加
+                <input type="file" id="symbolFilesInput" accept="image/*" multiple hidden>
+              </label>
+              <label class="btn btn-secondary btn-sm file-btn" title="PCで解凍したDROPSフォルダごと取り込めます">
+                📁 フォルダ追加
+                <input type="file" id="symbolFolderInput" accept="image/*" webkitdirectory directory multiple hidden>
+              </label>
+              <button type="button" class="btn btn-ghost btn-sm" id="btnToggleSymbolDelete">🗑 整理</button>
+            </div>
+
+            <div class="symbol-status-row">
+              <span class="symbol-count" id="symbolCountText">登録シンボル：0 こ</span>
+              <button type="button" class="text-link-btn hidden" id="btnClearAllSymbols">すべて削除</button>
+            </div>
+
+            <div class="symbol-picker-grid" id="symbolPickerGrid"></div>
+
+            <p class="media-hint symbol-guide">
+              💡 <a href="https://droptalk.net/symbol/" target="_blank" rel="noopener noreferrer">DROPS公式サイト（droptalk.net）</a>からダウンロードしたシンボル画像（PNG）を「まとめて追加」または「フォルダ追加」で取り込むと、名前で検索してすぐ選べます。（一度取り込むと端末内に保存されます／出典：© Droplet Project）
+            </p>
+          </div>
+
+          <!-- 絵文字パネル -->
+          <div class="emoji-picker hidden" id="emojiPicker"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="btnCancelStepEditFooter">やめる</button>
+        <button type="button" class="btn btn-primary" id="btnSaveStepEdit">ほぞんする</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js?v=12"></script>
+</body>
+</html>

@@ -1,0 +1,2139 @@
+/* =========================================================
+   特別支援学校向け てじゅんひょう（スケジュール）アプリ
+   UD配慮・iPadタッチ最適化・レスポンシブ設計
+   ========================================================= */
+
+:root {
+  --bg-page: #f3f7fb;
+  --bg-surface: #ffffff;
+  --bg-muted: #e8eef5;
+  --text-main: #1d2939;
+  --text-sub: #475467;
+  --border-color: #d0dce8;
+
+  /* テーマカラー（デフォルト：あさ） */
+  --accent: #0284c7;
+  --accent-dark: #0369a1;
+  --accent-soft: #e0f2fe;
+  --accent-border: #38bdf8;
+  --header-bg: #ffffff;
+
+  /* 完了カラー（安心感のあるやさしい緑） */
+  --done-bg: #ecfdf3;
+  --done-border: #34d399;
+  --done-accent: #059669;
+  --done-accent-dark: #047857;
+  --done-text: #065f46;
+
+  /* 危険・削除 */
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+
+  /* サイズ */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.09);
+
+  /* フォントサイズ基準 */
+  --step-font-size: 1.55rem;
+  --step-hint-size: 1.02rem;
+  --single-font-size: 2.35rem;
+}
+
+body.theme-morning {
+  --bg-page: #f0f7ff;
+  --accent: #0284c7;
+  --accent-dark: #0369a1;
+  --accent-soft: #e0f2fe;
+  --accent-border: #38bdf8;
+}
+
+body.theme-evening {
+  --bg-page: #fff7ed;
+  --accent: #ea580c;
+  --accent-dark: #c2410c;
+  --accent-soft: #ffedd5;
+  --accent-border: #fb923c;
+}
+
+body.theme-green {
+  --bg-page: #f2fbf6;
+  --accent: #15803d;
+  --accent-dark: #166534;
+  --accent-soft: #dcfce7;
+  --accent-border: #4ade80;
+}
+
+body.theme-purple {
+  --bg-page: #f7f4ff;
+  --accent: #6d28d9;
+  --accent-dark: #5b21b6;
+  --accent-soft: #ede9fe;
+  --accent-border: #a78bfa;
+}
+
+body.font-large {
+  --step-font-size: 1.95rem;
+  --step-hint-size: 1.2rem;
+  --single-font-size: 2.85rem;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.45;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ---------- アプリ全体シェル ---------- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ---------- ヘッダー ---------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--header-bg);
+  border-bottom: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+.header-current-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+}
+
+.schedule-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.schedule-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.schedule-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: var(--bg-muted);
+  color: var(--text-sub);
+  border: 2px solid transparent;
+  white-space: nowrap;
+  transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.schedule-tab:active {
+  transform: scale(0.97);
+}
+
+.schedule-tab.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent-dark);
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.22);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.view-toggle {
+  display: inline-flex;
+  background: var(--bg-muted);
+  padding: 4px;
+  border-radius: 14px;
+  gap: 4px;
+}
+
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.toggle-btn[aria-pressed="true"] {
+  background: #ffffff;
+  color: var(--accent-dark);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.icon-action-btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  height: 52px;
+  padding: 4px 8px;
+  border-radius: 14px;
+  background: var(--bg-muted);
+  color: var(--text-main);
+  font-size: 1.2rem;
+  font-weight: 700;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.icon-action-btn:active {
+  transform: scale(0.95);
+  background: #dce5f0;
+}
+
+.action-sub {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+/* 先生モード長押しリング */
+.teacher-hold-btn {
+  overflow: visible;
+}
+
+.hold-ring {
+  position: absolute;
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  pointer-events: none;
+  transform: rotate(-90deg);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.teacher-hold-btn.holding .hold-ring {
+  opacity: 1;
+}
+
+.hold-ring-bg {
+  fill: none;
+  stroke: rgba(2, 132, 199, 0.2);
+  stroke-width: 3.5;
+}
+
+.hold-ring-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 119.38;
+  stroke-dashoffset: 119.38;
+}
+
+/* ---------- 進捗バー ---------- */
+.progress-bar-wrap {
+  max-width: 980px;
+  width: 100%;
+  margin: 14px auto 4px;
+  padding: 0 18px;
+}
+
+.progress-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.progress-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.progress-count {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  padding: 4px 14px;
+  border-radius: 999px;
+}
+
+.progress-rail-wrap {
+  position: relative;
+}
+
+.progress-track {
+  width: 100%;
+  height: 16px;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.train-runner {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -58%);
+  pointer-events: none;
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
+  z-index: 2;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--done-accent));
+  border-radius: 999px;
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- メインエリア ---------- */
+.main-content {
+  flex: 1;
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 14px 18px 36px;
+}
+
+/* ---------- いちらんモード ---------- */
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 3px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.14s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.step-card.is-current {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.16);
+  background: #ffffff;
+}
+
+.step-card.is-done {
+  background: var(--done-bg);
+  border-color: var(--done-border);
+  box-shadow: none;
+}
+
+.step-card.is-locked {
+  opacity: 0.62;
+}
+
+/* 完了カードを折りたたむ設定時 */
+body.compact-done .step-card.is-done {
+  padding: 10px 18px;
+  opacity: 0.82;
+}
+body.compact-done .step-card.is-done .step-visual {
+  width: 54px;
+  height: 54px;
+  font-size: 2rem;
+}
+body.compact-done .step-card.is-done .step-text {
+  font-size: 1.2rem;
+}
+body.compact-done .step-card.is-done .step-hint {
+  display: none;
+}
+
+.step-num-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: var(--bg-muted);
+  color: var(--text-main);
+}
+
+.step-card.is-current .step-number {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.step-card.is-done .step-number {
+  background: var(--done-accent);
+  color: #ffffff;
+}
+
+.now-pill {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.step-visual {
+  width: 92px;
+  height: 92px;
+  border-radius: var(--radius-md);
+  background: var(--bg-page);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.4rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.step-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 4px;
+  display: block;
+}
+
+.step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-text {
+  font-size: var(--step-font-size);
+  font-weight: 800;
+  color: var(--text-main);
+  word-break: break-word;
+}
+
+.step-card.is-done .step-text {
+  color: var(--done-text);
+}
+
+.step-hint {
+  margin-top: 4px;
+  font-size: var(--step-hint-size);
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.step-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.speak-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+.speak-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.speak-btn:disabled {
+  background: var(--bg-muted);
+  color: var(--text-sub);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.done-btn {
+  min-width: 132px;
+  min-height: 64px;
+  padding: 12px 20px;
+  border-radius: 18px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-muted);
+  color: var(--text-main);
+  border: 2px solid var(--border-color);
+  transition: transform 0.12s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.done-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.done-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.step-card.is-current .done-btn {
+  background: var(--done-accent);
+  color: #ffffff;
+  border-color: var(--done-accent-dark);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+}
+
+.step-card.is-done .done-btn {
+  background: #ffffff;
+  color: var(--done-accent);
+  border-color: var(--done-border);
+}
+
+.step-card.is-done .done-btn:disabled {
+  opacity: 0.92;
+  cursor: default;
+}
+
+/* ---------- 1まいずつモード ---------- */
+.single-step-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.single-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.single-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  color: var(--text-sub);
+}
+
+.single-dot.is-done {
+  background: var(--done-accent);
+  border-color: var(--done-accent);
+  color: #ffffff;
+}
+
+.single-dot.is-current {
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  color: #ffffff;
+  transform: scale(1.14);
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.3);
+}
+
+.single-card {
+  width: 100%;
+  max-width: 760px;
+  background: #ffffff;
+  border: 4px solid var(--accent);
+  border-radius: 30px;
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.single-top-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.single-step-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.single-visual {
+  width: min(300px, 62vw);
+  height: min(250px, 44vh);
+  border-radius: 24px;
+  background: var(--bg-page);
+  border: 3px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7.5rem;
+  overflow: hidden;
+}
+
+.single-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 8px;
+  display: block;
+}
+
+.single-text {
+  font-size: var(--single-font-size);
+  font-weight: 900;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.single-hint {
+  font-size: 1.25rem;
+  color: var(--text-sub);
+  font-weight: 700;
+  margin: -8px 0 0;
+}
+
+.single-done-btn {
+  width: 100%;
+  max-width: 440px;
+  min-height: 82px;
+  border-radius: 24px;
+  background: var(--done-accent);
+  color: #ffffff;
+  font-size: 1.85rem;
+  font-weight: 900;
+  box-shadow: 0 8px 22px rgba(5, 150, 105, 0.32);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: transform 0.12s ease;
+}
+
+.single-done-btn:active {
+  transform: scale(0.96);
+}
+
+.single-footer-row {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.single-prev-btn {
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.single-next-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-left: auto;
+}
+
+.single-next-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--bg-page);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 1.35rem;
+}
+
+.single-next-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+}
+
+/* ---------- 完了画面 ---------- */
+.complete-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.complete-card {
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border: 4px solid var(--done-border);
+  border-radius: 30px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  animation: popIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.complete-badge {
+  font-size: 6rem;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.complete-heading {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--done-text);
+  margin: 0 0 8px;
+}
+
+.complete-sub {
+  font-size: 1.25rem;
+  color: var(--text-sub);
+  font-weight: 700;
+  margin: 0 0 22px;
+}
+
+.next-activity-box {
+  background: var(--accent-soft);
+  border: 2px solid var(--accent-border);
+  border-radius: 18px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.next-activity-label {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  margin-bottom: 4px;
+}
+
+.next-activity-text {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.complete-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.big-btn {
+  min-height: 60px;
+  padding: 14px 26px;
+  border-radius: 18px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.primary-btn {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.secondary-btn {
+  background: var(--bg-muted);
+  color: var(--text-main);
+}
+
+/* ---------- トースト ---------- */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(29, 41, 57, 0.92);
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  z-index: 100;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  max-width: 90vw;
+  text-align: center;
+}
+
+/* ---------- モーダル共通 ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#stepEditModal {
+  z-index: 60;
+}
+
+#pinModal {
+  z-index: 65;
+}
+
+#confirmModal {
+  z-index: 70;
+}
+
+/* 4けたパスワード入力モーダル */
+.pin-modal-card {
+  max-width: 360px;
+  padding: 24px 20px 20px;
+}
+
+.pin-desc {
+  margin: 6px 0 14px;
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.pin-dots.shake {
+  animation: pinShake 0.32s ease;
+}
+
+@keyframes pinShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+
+.pin-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border-color);
+  background: #ffffff;
+  transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+
+.pin-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+.pin-dot.error {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.pin-error {
+  min-height: 22px;
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pin-key {
+  height: 58px;
+  border-radius: 14px;
+  background: var(--bg-muted);
+  color: var(--text-main);
+  font-size: 1.55rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, background-color 0.12s ease;
+}
+
+.pin-key:active {
+  transform: scale(0.94);
+  background: var(--accent-soft);
+}
+
+.pin-key-sub {
+  font-size: 0.98rem;
+  color: var(--text-sub);
+  background: #f1f5f9;
+}
+
+/* 設定画面のパスワード設定行 */
+.setting-item-pin {
+  flex-wrap: wrap;
+}
+
+.pin-setting-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pin-input {
+  width: 110px;
+  text-align: center;
+  letter-spacing: 0.25em;
+  font-weight: 800;
+}
+
+.modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28);
+  width: 100%;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-small { max-width: 440px; padding: 24px; }
+.modal-medium { max-width: 640px; }
+.modal-large { max-width: 880px; height: 88dvh; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border-color);
+  background: #f8fafc;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.modal-desc {
+  color: var(--text-sub);
+  margin: 10px 0 20px;
+  font-size: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border-color);
+  background: #f8fafc;
+}
+
+.modal-small .modal-footer {
+  padding: 0;
+  border-top: none;
+  background: transparent;
+}
+
+/* ---------- 汎用ボタン ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: var(--bg-muted);
+  color: var(--text-main);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-sub);
+  border: 1px solid var(--border-color);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 0.88rem;
+  border-radius: 10px;
+}
+
+.file-btn {
+  cursor: pointer;
+}
+
+/* ---------- せんせいモード内部 ---------- */
+.teacher-quick-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  background: #ffffff;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.quick-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.quick-group-right {
+  margin-left: auto;
+}
+
+.quick-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.teacher-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 18px 0;
+  border-bottom: 1px solid var(--border-color);
+  background: #f8fafc;
+  overflow-x: auto;
+}
+
+.teacher-tab {
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.teacher-tab.active {
+  color: var(--accent-dark);
+  border-bottom-color: var(--accent);
+}
+
+.teacher-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 22px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.panel-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.panel-hint {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-sub);
+}
+
+.inline-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.schedule-meta-box {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.form-field-sm {
+  flex: 0 1 160px;
+  min-width: 120px;
+}
+
+.form-field label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.form-input, .form-select {
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: #ffffff;
+  color: var(--text-main);
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-input-lg {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* 編集用ステップ一覧 */
+.drag-hint {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  color: var(--text-sub);
+  background: var(--accent-soft);
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.edit-step-list, .schedule-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-step-row, .schedule-manage-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.edit-step-row {
+  cursor: grab;
+}
+
+.edit-step-row.is-drag-placeholder {
+  background: var(--accent-soft);
+  border: 2px dashed var(--accent);
+  opacity: 0.45;
+}
+
+.drag-handle {
+  width: 34px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--bg-muted);
+  color: var(--text-sub);
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.drag-ghost {
+  position: fixed;
+  z-index: 80;
+  margin: 0;
+  pointer-events: none;
+  border-color: var(--accent) !important;
+  background: #ffffff !important;
+  box-shadow: 0 16px 36px rgba(2, 132, 199, 0.28);
+  transform: scale(1.02);
+  opacity: 0.96;
+}
+
+.edit-step-order {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.edit-step-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.edit-step-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 2px;
+}
+
+.edit-step-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.edit-step-info strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.edit-step-info span {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+.edit-row-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ステップ編集モーダル内部 */
+.step-edit-body {
+  padding: 18px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.media-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.media-preview-box {
+  width: 112px;
+  height: 112px;
+  border-radius: 18px;
+  background: var(--bg-page);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.media-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 4px;
+}
+
+.media-buttons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.media-hint {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-sub);
+}
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.emoji-choice {
+  height: 48px;
+  border-radius: 10px;
+  font-size: 1.7rem;
+  background: #ffffff;
+  border: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-choice.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* DROPS / シンボルピッカー */
+.picker-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.picker-tab {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  background: var(--bg-muted);
+  color: var(--text-sub);
+  border: 2px solid transparent;
+}
+
+.picker-tab.active {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  border-color: var(--accent);
+}
+
+.symbol-picker-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.symbol-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.symbol-search-input {
+  flex: 1;
+  min-width: 170px;
+  padding: 8px 12px;
+  font-size: 0.92rem;
+}
+
+.symbol-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  padding: 0 2px;
+}
+
+.text-link-btn {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--danger);
+  text-decoration: underline;
+  padding: 2px 6px;
+}
+
+.symbol-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+  padding: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.symbol-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px 12px;
+  color: var(--text-sub);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.symbol-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.symbol-choice.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.symbol-choice img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  display: block;
+}
+
+.symbol-choice-name {
+  width: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.symbol-delete-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.symbol-guide a {
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+/* 設定タブ */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+}
+
+.setting-text strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.setting-text span {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+.toggle-switch {
+  width: 50px;
+  height: 28px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* バックアップタブ */
+.backup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.backup-card {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.backup-card h3 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.backup-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-sub);
+  flex: 1;
+}
+
+.danger-card {
+  background: var(--danger-soft);
+  border-color: #fecaca;
+}
+
+.privacy-note {
+  margin-top: 18px;
+  padding: 12px 16px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: #065f46;
+}
+
+.setting-item-train {
+  background: #fff1f2;
+  border: 2px solid #fda4af;
+}
+
+/* =========================================================
+   🚃 でんしゃモード（JR九州ふう 駅ナンバリング・路線図デザイン）
+   ========================================================= */
+body.train-mode {
+  --bg-page: #f5f3f0;
+  --header-bg: #1f2328;
+  --border-color: #d4d0ca;
+  --jr-red: #d90429;
+  --jr-red-dark: #a8001e;
+  --jr-gold: #c99a2e;
+  --line-color: #d90429;
+  --line-color-dark: #a8001e;
+  --line-soft: #ffe4e8;
+  --accent: var(--line-color);
+  --accent-dark: var(--line-color-dark);
+  --accent-soft: var(--line-soft);
+  --accent-border: var(--line-color);
+}
+
+body.train-mode.line-JB,
+body.train-mode.line-JA {
+  --line-color: #d90429;
+  --line-color-dark: #a8001e;
+  --line-soft: #ffe4e8;
+}
+
+body.train-mode.line-JC {
+  --line-color: #d97706;
+  --line-color-dark: #b45309;
+  --line-soft: #fef3c7;
+}
+
+body.train-mode.line-JD {
+  --line-color: #0284c7;
+  --line-color-dark: #0369a1;
+  --line-soft: #e0f2fe;
+}
+
+body.train-mode.line-JF {
+  --line-color: #1d4ed8;
+  --line-color-dark: #1e3a8a;
+  --line-soft: #dbeafe;
+}
+
+body.train-mode.line-JK {
+  --line-color: #15803d;
+  --line-color-dark: #166534;
+  --line-soft: #dcfce7;
+}
+
+/* JR九州ふうヘッダー（黒×赤ライン×ゴールド帯） */
+body.train-mode .app-header {
+  background: #1f2328;
+  border-bottom: 4px solid var(--jr-red);
+  box-shadow: 0 3px 0 0 var(--jr-gold), 0 6px 16px rgba(0, 0, 0, 0.16);
+}
+
+body.train-mode .header-current-title {
+  color: #ffffff;
+}
+
+body.train-mode .icon-action-btn {
+  background: #323840;
+  color: #ffffff;
+}
+
+body.train-mode .action-sub {
+  color: #cbd5e1;
+}
+
+/* 線路ふう進捗バー */
+body.train-mode .progress-rail-wrap {
+  padding: 6px 26px;
+}
+
+body.train-mode .progress-track {
+  height: 18px;
+  border: 2px solid #475569;
+  background: repeating-linear-gradient(
+    90deg,
+    #ffffff 0px,
+    #ffffff 10px,
+    #e2e8f0 10px,
+    #e2e8f0 14px
+  );
+}
+
+body.train-mode .progress-fill {
+  background: linear-gradient(90deg, var(--jr-red), var(--line-color));
+}
+
+body.train-mode .progress-count {
+  background: #1f2328;
+  color: #ffffff;
+  border: 2px solid var(--jr-gold);
+}
+
+/* 路線図ふう 縦の路線ライン */
+body.train-mode .step-list {
+  position: relative;
+}
+
+body.train-mode .step-card {
+  position: relative;
+  border-width: 3px;
+  border-left: 8px solid var(--line-color);
+}
+
+body.train-mode .step-card.is-current {
+  border-color: var(--line-color);
+  border-left-width: 10px;
+  box-shadow: 0 8px 24px rgba(217, 4, 41, 0.18);
+}
+
+body.train-mode .step-card.is-done {
+  border-left-color: var(--done-accent);
+}
+
+/* JR九州 駅ナンバリングプレート（JB 1, JB 2 ...） */
+.station-badge {
+  width: 62px;
+  min-height: 64px;
+  border-radius: 12px;
+  border: 3.5px solid var(--line-color, #d90429);
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.station-badge-code {
+  background: var(--line-color, #d90429);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 2px 0 1px;
+  line-height: 1.15;
+}
+
+.station-badge-num {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1.1;
+  padding: 3px 0;
+}
+
+.step-card.is-done .station-badge {
+  border-color: var(--done-accent);
+}
+
+.step-card.is-done .station-badge-code {
+  background: var(--done-accent);
+}
+
+.step-card.is-done .station-badge-num {
+  color: var(--done-text);
+}
+
+/* JR九州 駅名標（駅の看板）デザイン */
+.station-sign-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 10px 16px 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.step-card.is-current .station-sign-body {
+  border-color: #1f2328;
+  box-shadow: 0 3px 10px rgba(31, 35, 40, 0.12);
+}
+
+.step-card.is-done .station-sign-body {
+  background: #f8fffb;
+  border-color: #86efac;
+}
+
+.station-sign-body .step-text {
+  text-align: center;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+}
+
+.station-sign-body .step-hint {
+  text-align: center;
+  margin-top: 2px;
+}
+
+.station-sign-bar {
+  position: relative;
+  height: 10px;
+  margin: 8px 10px 5px 0;
+  border-radius: 2px;
+  background: var(--line-color, #d90429);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.station-sign-bar::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 11px solid var(--line-color, #d90429);
+}
+
+body.compact-done .step-card.is-done .station-sign-body {
+  padding: 6px 12px;
+}
+
+body.compact-done .step-card.is-done .station-sign-neighbors {
+  display: none;
+}
+
+.station-sign-point {
+  width: 24px;
+  height: 10px;
+  background: #ffffff;
+  border: 2.5px solid #1f2328;
+  border-radius: 3px;
+}
+
+.step-card.is-done .station-sign-bar {
+  background: var(--done-accent);
+}
+
+.step-card.is-done .station-sign-bar::after {
+  border-left-color: var(--done-accent);
+}
+
+.station-sign-neighbors {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.station-sign-neighbors span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 48%;
+}
+
+.station-sign-neighbors .neighbor-next {
+  color: #1f2328;
+  text-align: right;
+  margin-left: auto;
+}
+
+/* 1まいずつモードの駅名標プレート */
+.single-station-sign {
+  width: 100%;
+  max-width: 560px;
+  padding: 14px 22px 12px;
+  border: 3px solid #1f2328;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(31, 35, 40, 0.1);
+}
+
+.single-station-sign .single-text {
+  letter-spacing: 0.08em;
+}
+
+.single-station-sign .station-sign-bar {
+  height: 13px;
+  margin: 12px 0 8px;
+}
+
+.single-station-sign .station-sign-bar::after {
+  border-top-width: 10px;
+  border-bottom-width: 10px;
+  border-left-width: 14px;
+}
+
+.single-station-sign .station-sign-point {
+  width: 30px;
+  height: 13px;
+}
+
+.single-station-sign .station-sign-neighbors {
+  font-size: 0.92rem;
+}
+
+/* 1まいずつモードのJR九州駅名標スタイル */
+body.train-mode .single-card {
+  border-color: var(--line-color);
+  border-top: 12px solid var(--jr-red);
+  box-shadow: 0 10px 28px rgba(31, 35, 40, 0.14);
+}
+
+.single-station-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.station-badge-lg {
+  width: 72px;
+  min-height: 72px;
+  border-width: 4px;
+}
+
+.station-badge-lg .station-badge-code {
+  font-size: 0.98rem;
+}
+
+.station-badge-lg .station-badge-num {
+  font-size: 1.8rem;
+}
+
+body.train-mode .single-dot {
+  border-color: var(--line-color);
+  font-size: 0.82rem;
+  width: 42px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+body.train-mode .single-dot.is-current {
+  background: var(--line-color);
+  border-color: #1f2328;
+}
+
+/* 完了画面（しゅうてん とうちゃく！） */
+body.train-mode .complete-card {
+  border-color: var(--jr-red);
+  border-top: 14px solid #1f2328;
+  box-shadow: 0 12px 32px rgba(217, 4, 41, 0.16);
+}
+
+body.train-mode .complete-heading {
+  color: var(--jr-red-dark);
+}
+
+.complete-station-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #1f2328;
+  color: #ffffff;
+  border: 2px solid var(--jr-gold);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.complete-station-code {
+  background: var(--line-color, #d90429);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* ---------- レスポンシブ（スマホ・縦向きiPad配慮） ---------- */
+@media (max-width: 680px) {
+  .app-header {
+    padding: 10px 12px;
+  }
+  .schedule-tab {
+    padding: 9px 14px;
+    font-size: 1rem;
+  }
+  .btn-label {
+    display: none;
+  }
+  .step-card {
+    padding: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .step-visual {
+    width: 72px;
+    height: 72px;
+    font-size: 2.6rem;
+  }
+  .step-actions {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+  .done-btn {
+    flex: 1;
+    min-height: 54px;
+  }
+  .single-card {
+    padding: 20px 16px;
+  }
+}
+
+/* ---------- 印刷用スタイル（紙の手順表として出力） ---------- */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .app-header,
+  .progress-track,
+  .step-actions,
+  .modal-backdrop,
+  .toast,
+  .single-step-view,
+  .complete-view {
+    display: none !important;
+  }
+  .step-list {
+    display: flex !important;
+  }
+  .step-card {
+    box-shadow: none !important;
+    border: 2px solid #334155 !important;
+    page-break-inside: avoid;
+    background: #ffffff !important;
+  }
+  .now-pill {
+    display: none !important;
+  }
+}

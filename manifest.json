@@ -1,0 +1,26 @@
+{
+  "name": "てじゅんひょう（あさ・かえりの じゅんび）",
+  "short_name": "てじゅんひょう",
+  "description": "特別支援学校で使える、あさ・かえりのじゅんび用スケジュール（手順表）アプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f0f7ff",
+  "theme_color": "#0284c7",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
